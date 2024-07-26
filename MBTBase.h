@@ -25,3 +25,12 @@ enum class MBTExecuteType : MUINT16
 	CompleteTaskNode,		// 작업 노드가 종료됨
 	Loop,					// 루프
 };
+
+
+// 블랙보드 값 타입
+enum class MBTBlackBoardValueType : MUINT16
+{
+	Int,
+	Bool,
+	String,
+};
