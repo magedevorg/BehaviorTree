@@ -4,7 +4,7 @@
 #include "MBTDecorator.h"
 #include "MBTNode.h"
 #include "MBehaviorTree.h"
-
+#include "MBTBlackboard.h"
 
 //-----------------------------------------------------------------
 // MBTDecorator
@@ -24,7 +24,34 @@ MBTBlackboardDecorator::MBTBlackboardDecorator(class MBTNode* inNode)
 {	
 }
 
-void MBTBlackboardDecorator::InitDecorator(class MBehaviorTree* inBehaviorTree)
+MBOOL MBTBlackboardDecorator::CheckCondition(class MBTBlackboard* inBlackboard)
 {
-	inBehaviorTree->AddBlackboardDecorator(this);
+	// 타입별 처리
+	MBTBlackboardValueType valueType = inBlackboard->GetValueType(Key);
+	switch (valueType)
+	{
+	case MBTBlackboardValueType::Bool:
+	{
+		// 값을 얻는다
+		MBOOL value = inBlackboard->GetBoolValue(Key);
+
+		MBOOL check = MFALSE;
+		if (MBTKeyOperation::Set == KeyOperation) {
+			check = MTRUE;
+		}
+
+		if (check == value) {
+			return TRUE;
+		}
+	} break;
+	case MBTBlackboardValueType::Int32:
+	{
+		MINT32 value = inBlackboard->GetInt32Value(Key);
+		return CheckArithmeticOperation(value, Int32Value);
+
+	} break;
+	}
+
+	MASSERT(MFALSE);
+	return MFALSE;
 }

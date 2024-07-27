@@ -6,7 +6,17 @@
 
 MBTBlackboard::~MBTBlackboard()
 {
-	MCLEAR_PTR_MAP(IntValueMap);
+	MCLEAR_PTR_MAP(Int32ValueMap);
 	MCLEAR_PTR_MAP(BoolValueMap);
-	MCLEAR_PTR_MAP(StringValueMap);
+}
+
+
+MBTBlackboardValueType MBTBlackboard::GetValueType(const MString& inKey)
+{
+	auto findIter = ValueTypeMap.find(inKey);
+	if (ValueTypeMap.end() != findIter) {
+		return findIter->second;
+	}
+
+	return MBTBlackboardValueType::None;
 }

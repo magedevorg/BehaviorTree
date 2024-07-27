@@ -10,7 +10,7 @@
 
 class MBehaviorTree
 {
-	friend class MBTBlackboardDecorator;
+	friend class MBTNode;
 
 public:
 	MBehaviorTree();

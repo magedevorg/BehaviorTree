@@ -55,17 +55,22 @@ public:
 	// 기능함수
 	//-----------------------------------------------------------
 	// 실행
-	virtual bool Execute(MBTResult& inResult, const MBTExecuteParam& inParam) { return true; }
-
-	// 데코레이터 추가
-	template<typename T>
-	T* AddDecorator()
-	{
-		T* decorator = new T(this);
-		DecoratorList.push_back(decorator);
+	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) { 
+		return MTRUE; 
 	}
 
+	// 노드 갱신
+	virtual MBTResult Update(class MBehaviorTree* inBehaviorTree, float inDelta) {
+		return MBTResult::Succeeded;
+	}
+	
 
+	//-----------------------------------------------------------
+	// 데코레이터 추가
+	//-----------------------------------------------------------
+	class MBTBlackboardDecorator* AddBlackboardDecorator();
+
+	
 	//-----------------------------------------------------------
 	// Getter
 	//-----------------------------------------------------------
@@ -79,14 +84,24 @@ public:
 	}
 
 protected:
+	// 해당 노드가 실행될수 있는지 체크
+	MBOOL CheckExecuteCondition(const MBTExecuteParam& inParam);
+
+	
+	
+
+protected:
 	// 노드 번호
 	MINT32 Num = 0;
 
 	// 트리 깊이
 	MINT32 Depth = 0;
 
+	//--------------------------------------------------------------
 	// 데코레이터 리스트
-	std::list<class MBTDecorator*> DecoratorList;
+	//--------------------------------------------------------------
+	// 블랙보드 데코레이터
+	std::list<class MBTBlackboardDecorator*> BlackboardDecoratorList;
 };
 
 
@@ -114,8 +129,8 @@ public:
 	T* AddChildNode()
 	{
 		T* childNode = new T();
-		childNode->InitNode();
-		ChildNodeList.insert(childNode);
+		//childNode->InitNode();
+		ChildNodeList.push_back(childNode);
 		return childNode;
 	}
 
@@ -135,7 +150,7 @@ public:
 	MBTSequenceNode() {}
 
 public:
-	virtual bool Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
+	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
 };
 
 
@@ -150,7 +165,7 @@ public:
 	MBTSelectorNode() {}
 
 public:
-	virtual bool Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
+	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
 };
 
 
@@ -166,17 +181,19 @@ public:
 
 public:
 	// 노드 실행
-	virtual bool Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
+	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
 
-
-	// 노드 갱신 처리
-	virtual MBTResult UpdateTaskNode(class MBehaviorTree* inBehaviorTree, float inDelta) {
-		return MBTResult::Succeeded;
-	}
+	// 노드 갱신
+	virtual MBTResult Update(class MBehaviorTree* inBehaviorTree, float inDelta) override;
 
 protected:
 	// 작업 시작
 	virtual MBTResult ExecuteTaskNode(class MBehaviorTree* inBehaviorTree) {
+		return MBTResult::Succeeded;
+	}
+
+	// 노드 갱신 처리
+	virtual MBTResult UpdateTaskNode(class MBehaviorTree* inBehaviorTree, float inDelta) {
 		return MBTResult::Succeeded;
 	}
 };

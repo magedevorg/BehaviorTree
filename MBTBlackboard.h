@@ -48,41 +48,44 @@ public:
 	virtual ~MBTBlackboard();
 
 public:
+
+	// 값 타입을 얻는다
+	MBTBlackboardValueType GetValueType(const MString& inKey);
+
 	//-------------------------------------------------------------
-	// 등록 로직
+	// int32
 	//-------------------------------------------------------------
 	void AddInt32Value(const MString& inKey, MINT32 inValue) {
-		AddValueLogic<MINT32>(IntValueMap, inKey, inValue, MBTBlackBoardValueType::Int);
+		AddValueLogic<MINT32>(Int32ValueMap, inKey, inValue, MBTBlackboardValueType::Int32);
 	}
 
-	void AddBoolValue(const MString& inKey, MBOOL inValue) {
-		AddValueLogic<bool>(BoolValueMap, inKey, inValue, MBTBlackBoardValueType::Bool);
-	}
-
-	void AddStringValue(const MString& inKey, const MString& inValue) {
-		AddValueLogic<MString>(StringValueMap, inKey, inValue, MBTBlackBoardValueType::String);
-	}
-
-	//-------------------------------------------------------------
-	// 설정 로직
-	//-------------------------------------------------------------
 	void SetInt32Value(const MString& inKey, MINT32 inValue) {
-		SetValueLogic<MINT32>(IntValueMap, inKey, inValue);
+		SetValueLogic<MINT32>(Int32ValueMap, inKey, inValue);
+	}
+
+	MINT32 GetInt32Value(const MString& inKey) {
+		return GetValueLogic<MINT32>(Int32ValueMap, inKey);
+	}
+
+	//-------------------------------------------------------------
+	// bool
+	//-------------------------------------------------------------
+	void AddBoolValue(const MString& inKey, MBOOL inValue) {
+		AddValueLogic<bool>(BoolValueMap, inKey, inValue, MBTBlackboardValueType::Bool);
 	}
 
 	void SetBoolValue(const MString& inKey, MBOOL inValue) {
 		SetValueLogic<MBOOL>(BoolValueMap, inKey, inValue);
 	}
 
-	void SetStringValue(const MString& inKey, const MString& inValue) {
-		SetValueLogic<MString>(StringValueMap, inKey, inValue);
+	MBOOL GetBoolValue(const MString& inKey) {
+		return GetValueLogic<MBOOL>(BoolValueMap, inKey);
 	}
-
 	
 protected:
 	// 사용할 블랙보드 값을 등록
 	template <typename T>
-	void AddValueLogic(std::map<MString, MBTBlackboardValue<T>*>& inMap, const MString& inKey, const T& inValue, MBTBlackBoardValueType inType)
+	void AddValueLogic(std::map<MString, MBTBlackboardValue<T>*>& inMap, const MString& inKey, const T& inValue, MBTBlackboardValueType inType)
 	{
 		// 이미 등록된 키인지 체크
 		MASSERT(ValueTypeMap.end() == ValueTypeMap.find(inKey));
@@ -118,18 +121,25 @@ protected:
 		}
 	}
 
+	template<typename T>
+	const T& GetValueLogic(std::map<MString, MBTBlackboardValue<T>*>& inMap, const MString& inKey)
+	{
+		auto findIter = inMap.find(inKey);
+		MASSERT(inMap.end() != findIter);
+
+		MBTBlackboardValue<T>* blackBoardValue = findIter->second;
+		return blackBoardValue->Value;
+	}
+
 protected:
 	//--------------------------------------------------------------
 	// 각 자료형 타입
 	//--------------------------------------------------------------
 	// 정수형 값
-	std::map<MString, MBTBlackboardValue<MINT32>*> IntValueMap;
+	std::map<MString, MBTBlackboardValue<MINT32>*> Int32ValueMap;
 
 	// 부울 값
 	std::map<MString, MBTBlackboardValue<MBOOL>*> BoolValueMap;
-
-	// 스트링 값
-	std::map<MString, MBTBlackboardValue<MString>*> StringValueMap;
 
 	//--------------------------------------------------------------
 	// 기타
@@ -138,5 +148,5 @@ protected:
 	std::vector<MBTBlackboardValueBase*> ChangeValueList;
 
 	// 해당 키의 값 타입 맵
-	std::map<MString, MBTBlackBoardValueType> ValueTypeMap;
+	std::map<MString, MBTBlackboardValueType> ValueTypeMap;
 };

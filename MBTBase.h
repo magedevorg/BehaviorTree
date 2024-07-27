@@ -28,9 +28,29 @@ enum class MBTExecuteType : MUINT16
 
 
 // 블랙보드 값 타입
-enum class MBTBlackBoardValueType : MUINT16
+enum class MBTBlackboardValueType : MUINT16
 {
-	Int,
+	None = 0,
+	Int32,
 	Bool,
-	String,
+};
+
+
+// 설정되었는지
+enum class MBTKeyOperation : MUINT16
+{
+	Set,				
+	NotSet
+};
+
+
+// 산술 연산
+enum class MBTArithmeticOperation : uint8
+{
+	Equal,		
+	NotEqual,
+	Less,		
+	LessOrEqual,
+	Greater,	
+	GreaterOrEqual,
 };
