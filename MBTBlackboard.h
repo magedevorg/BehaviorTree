@@ -81,6 +81,18 @@ public:
 	MBOOL GetBoolValue(const MString& inKey) {
 		return GetValueLogic<MBOOL>(BoolValueMap, inKey);
 	}
+
+
+	//-------------------------------------------------------------
+	// 변경값 관리
+	//-------------------------------------------------------------
+	std::vector<MBTBlackboardValueBase*>* GetChangeValueList() {
+		return &ChangeValueList;
+	}
+
+	void ClearChangeValueList() {
+		ChangeValueList.empty();
+	}
 	
 protected:
 	// 사용할 블랙보드 값을 등록

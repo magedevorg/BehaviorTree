@@ -47,59 +47,50 @@ void MBehaviorTree::FinishedNodeSetting()
 
 void MBehaviorTree::UpdateBehaviorTree(float inDelta)
 {
-	// 진행중이던 Task Node가 있다면 처리
-	MBTResult inProgressTaskResult = MBTResult::InProgress;
-
-	if (nullptr != InProgressTaskNode) {
-		inProgressTaskResult = InProgressTaskNode->Update(this, inDelta);
-	}
-
-	// 동작 처리
+	// 동작 파라미터 설정
 	MBTExecuteParam param;
 	{
 		param.BehaviorTree = this;
-		param.StartNum = 0;
-		param.ExecuteType = MBTExecuteType::None;
+		param.ExecuteNodeNum = std::numeric_limits<MINT32>::max();
+		param.ExecuteNodeResult = MBTResult::None;
 	}
 
 
-	const int32 MAX_NODE_NUM = 9999999;
-
-	// 대상 노드 번호
-	MINT32 targetNodeNum = MAX_NODE_NUM;
-
-	MBTResult result;
-
+	// 블랙보드 체크
+	CheckForceStartNode_BlackboardDecorator(param);
 
 
 	// 현재 진행중인 노드가 있는경우
 	if (nullptr != InProgressTaskNode)
 	{
-		// 현재 진행중인 노드가 우선순위가 더높은지 체크
-		MINT32 taskNodeNum = InProgressTaskNode->GetNum();
-		if (taskNodeNum < targetNodeNum)
+		// 진행중인 노드 번호
+		const MINT32 inProgressTaskNodeNum = InProgressTaskNode->GetNum();
+
+		// 강제 진행해야하는 노드보다 진행중인 노드의 우선순위가 더 높다면 그댜로 진행
+		if (inProgressTaskNodeNum < param.ExecuteNodeNum)
 		{
 			// 해당 노드가 진행중인경우 리턴
+			MBTResult inProgressTaskResult = InProgressTaskNode->Update(this, inDelta);
 			if (MBTResult::InProgress == inProgressTaskResult) {
 				return;
 			}
 
-			
-
 			// 그외의 경우는 해당 노드로 이동해서 그대로 결과 처리
-			param.StartNum = InProgressTaskNode->GetNum() + 1;
-			param.ExecuteType = MBTExecuteType::CompleteTaskNode;
-			result = inProgressTaskResult;
-
-
+			param.ExecuteNodeNum = inProgressTaskNodeNum;
+			param.ExecuteNodeResult = inProgressTaskResult;
+			
+			// 초기화
 			InProgressTaskNode = nullptr;
 		}
 	}
 	
-	
+	// 설정된 실행노드가 없다면 0부터 시작
+	if (std::numeric_limits<MINT32>::max() == param.ExecuteNodeNum) {
+		param.ExecuteNodeNum = 0;
+	}
 	
 	// 실행
-	RootNode->Execute(result, param);
+	RootNode->Execute(param);
 }
 
 void MBehaviorTree::AddBlackboardDecorator(class MBTBlackboardDecorator* inDecorator)
@@ -120,3 +111,41 @@ void MBehaviorTree::AddBlackboardDecorator(class MBTBlackboardDecorator* inDecor
 	
 	decoratorList->push_back(inDecorator);
 }
+
+
+
+void MBehaviorTree::CheckForceStartNode_BlackboardDecorator(MBTExecuteParam& inParam)
+{
+	// 변경된 블랙 보드 정보가 있는지 체크
+	std::vector<MBTBlackboardValueBase*>* changeValueList = Blackboard->GetChangeValueList();
+	if (MFALSE == changeValueList->empty())
+	{
+		// 변경내용이 존재한다면 루프를 돌면서 대상이 데코레이터에 설정된 내용인지 체크
+		for (MBTBlackboardValueBase* value : *changeValueList)
+		{
+			// 대상 데코레이터가 존재하는지 체크
+			auto findIter = BlackboardDecoratorListMap.find(value->Key);
+			if (BlackboardDecoratorListMap.end() != findIter)
+			{
+				// 대상이 존재한다면
+				std::list<class MBTBlackboardDecorator*>* decoratorList = findIter->second;
+				for (class MBTBlackboardDecorator* decorator : *decoratorList)
+				{
+					MBTNode* node = decorator->GetNode();
+					const MINT32 nodeNum = node->GetNum();
+
+					// 낮은 번호의 노드를 설정
+					inParam.ExecuteNodeNum = FMath::Min(inParam.ExecuteNodeNum, nodeNum);
+
+					// 결과는 None으로 설정해서 해당 노드에서 실행되도록
+					inParam.ExecuteNodeResult = MBTResult::None;
+				}
+			}
+		}
+
+		// 처리가 완료되었다면 변경정보 초기화
+		Blackboard->ClearChangeValueList();
+	}
+}
+
+

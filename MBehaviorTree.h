@@ -8,6 +8,11 @@
 
 
 
+
+//--------------------------------------------------------------------
+// 비헤비어 트리 클래스
+// 루트 노드는 CompositeNode로 설정
+//--------------------------------------------------------------------
 class MBehaviorTree
 {
 	friend class MBTNode;
@@ -52,6 +57,10 @@ protected:
 	// 블랙보드 데코레이터 추가
 	void AddBlackboardDecorator(class MBTBlackboardDecorator* inDecorator);
 
+
+	// 
+	void CheckForceStartNode_BlackboardDecorator(MBTExecuteParam& inParam);
+	
 protected:
 	// 루트 노드
 	class MBTCompositeNode* RootNode = nullptr;

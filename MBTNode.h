@@ -12,11 +12,12 @@ struct MBTExecuteParam
 	// 비헤비더 트리
 	class MBehaviorTree* BehaviorTree = nullptr;
 
-	// 시작 노드
-	int32 StartNum = 0;
-
-	// 실행 타입
-	MBTExecuteType ExecuteType = MBTExecuteType::None;
+	//-------------------------------------------------------
+	// 실행 정보
+	//-------------------------------------------------------
+	// 실행노드 
+	MINT32 ExecuteNodeNum = 0;
+	MBTResult ExecuteNodeResult = MBTResult::None;
 };
 
 
@@ -55,8 +56,8 @@ public:
 	// 기능함수
 	//-----------------------------------------------------------
 	// 실행
-	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) { 
-		return MTRUE; 
+	virtual MBTResult Execute(const MBTExecuteParam& inParam) {
+		return MBTResult::Succeeded;
 	}
 
 	// 노드 갱신
@@ -150,7 +151,7 @@ public:
 	MBTSequenceNode() {}
 
 public:
-	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
+	virtual MBTResult Execute(const MBTExecuteParam& inParam) override;
 };
 
 
@@ -165,7 +166,7 @@ public:
 	MBTSelectorNode() {}
 
 public:
-	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
+	virtual MBTResult Execute(const MBTExecuteParam& inParam) override;
 };
 
 
@@ -181,7 +182,7 @@ public:
 
 public:
 	// 노드 실행
-	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
+	virtual MBTResult Execute(const MBTExecuteParam& inParam) override;
 
 	// 노드 갱신
 	virtual MBTResult Update(class MBehaviorTree* inBehaviorTree, float inDelta) override;

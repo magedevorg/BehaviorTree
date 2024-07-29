@@ -29,7 +29,7 @@ protected:
 //-----------------------------------------------------------
 // 블랙보드의 특정 값이 변경된경우 호출
 //-----------------------------------------------------------
-class MBTBlackboardDecorator : MBTDecorator
+class MBTBlackboardDecorator : public MBTDecorator
 {
 public:
 	MBTBlackboardDecorator(class MBTNode* inNode);
