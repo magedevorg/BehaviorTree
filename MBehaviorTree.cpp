@@ -52,7 +52,7 @@ void MBehaviorTree::UpdateBehaviorTree(float inDelta)
 	{
 		param.BehaviorTree = this;
 		param.ExecuteNodeNum = std::numeric_limits<MINT32>::max();
-		param.ExecuteNodeResult = MBTResult::None;
+		param.ExecuteNodeResult = MBTExecuteResult::None;
 	}
 
 
@@ -77,7 +77,7 @@ void MBehaviorTree::UpdateBehaviorTree(float inDelta)
 
 			// 그외의 경우는 해당 노드로 이동해서 그대로 결과 처리
 			param.ExecuteNodeNum = inProgressTaskNodeNum;
-			param.ExecuteNodeResult = inProgressTaskResult;
+			param.ExecuteNodeResult = (MBTExecuteResult)inProgressTaskResult;
 			
 			// 초기화
 			InProgressTaskNode = nullptr;
@@ -138,7 +138,7 @@ void MBehaviorTree::CheckForceStartNode_BlackboardDecorator(MBTExecuteParam& inP
 					inParam.ExecuteNodeNum = FMath::Min(inParam.ExecuteNodeNum, nodeNum);
 
 					// 결과는 None으로 설정해서 해당 노드에서 실행되도록
-					inParam.ExecuteNodeResult = MBTResult::None;
+					inParam.ExecuteNodeResult = MBTExecuteResult::None;
 				}
 			}
 		}

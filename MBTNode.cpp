@@ -100,9 +100,9 @@ void MBTCompositeNode::InitDecorator(class MBehaviorTree* inBehaviorTree)
 // MBTSequenceNode
 // 모든 노드가 success일경우 success
 //-----------------------------------------------------------------
-MBTResult MBTSequenceNode::Execute(const MBTExecuteParam& inParam)
+MBTExecuteResult MBTSequenceNode::Execute(const MBTExecuteParam& inParam)
 {
-	MBTResult result = MBTResult::Skip;
+	MBTExecuteResult result = MBTExecuteResult::Skip;
 
 	// 자식 노드 실행
 	for (auto& childNode : ChildNodeList)
@@ -111,16 +111,16 @@ MBTResult MBTSequenceNode::Execute(const MBTExecuteParam& inParam)
 		result = childNode->Execute(inParam);
 
 		// none인경우 다음처리
-		if (MBTResult::Skip == result) {
+		if (MBTExecuteResult::Skip == result) {
 			continue;
 		}
 
 		// 실패/진행중/중단인 경우 리턴
 		switch (result)
 		{
-		case MBTResult::Failed:
-		case MBTResult::InProgress:
-		case MBTResult::Abort:
+		case MBTExecuteResult::Failed:
+		case MBTExecuteResult::InProgress:
+		case MBTExecuteResult::Abort:
 			return result;
 		}
 	}
@@ -134,9 +134,9 @@ MBTResult MBTSequenceNode::Execute(const MBTExecuteParam& inParam)
 // MBTSelectorNode
 // 모든 노드가 fail인경우 fail
 //-----------------------------------------------------------------
-MBTResult MBTSelectorNode::Execute(const MBTExecuteParam& inParam)
+MBTExecuteResult MBTSelectorNode::Execute(const MBTExecuteParam& inParam)
 {
-	MBTResult result = MBTResult::Skip;
+	MBTExecuteResult result = MBTExecuteResult::Skip;
 
 	// 자식 노드 루프
 	for (MBTNode* childNode : ChildNodeList)
@@ -145,16 +145,16 @@ MBTResult MBTSelectorNode::Execute(const MBTExecuteParam& inParam)
 		result = childNode->Execute(inParam);
 
 		// none인경우 다음처리
-		if (MBTResult::Skip == result) {
+		if (MBTExecuteResult::Skip == result) {
 			continue;
 		}
 
 		// 성공/처리중/중단인 경우 바로 리턴
 		switch (result)
 		{
-		case MBTResult::Succeeded:
-		case MBTResult::InProgress:
-		case MBTResult::Abort:
+		case MBTExecuteResult::Succeeded:
+		case MBTExecuteResult::InProgress:
+		case MBTExecuteResult::Abort:
 			return result;
 		}
 	}
@@ -167,28 +167,28 @@ MBTResult MBTSelectorNode::Execute(const MBTExecuteParam& inParam)
 //-----------------------------------------------------------------
 // MBTTaskNode
 //-----------------------------------------------------------------
-MBTResult MBTTaskNode::Execute(const MBTExecuteParam& inParam)
+MBTExecuteResult MBTTaskNode::Execute(const MBTExecuteParam& inParam)
 {
 	// 강제로 시작 노드 번호보다 작다면 스킵
 	if (Num < inParam.ExecuteNodeNum) {
-		return MBTResult::Skip;
+		return MBTExecuteResult::Skip;
 	}
 
 	// 강제 시작 노드라면 설정된 리턴값 처리
-	if (Num == inParam.ExecuteNodeNum && (MBTResult::None != inParam.ExecuteNodeResult)) {
+	if (Num == inParam.ExecuteNodeNum && (MBTExecuteResult::None != inParam.ExecuteNodeResult)) {
 		return inParam.ExecuteNodeResult;
 	}
 
 
 	// 테스크 노드 실행
 	MBTResult result = ExecuteTaskNode(inParam.BehaviorTree);
-
+	
 	// 만약 진행중이라면 행동 트리에 진행중인 작업을 설정하고 리턴
 	if (MBTResult::InProgress == result) {
 		inParam.BehaviorTree->SetInProgressTaskNode(this);
 	}
 
-	return result;
+	return (MBTExecuteResult)result;
 }
 
 
