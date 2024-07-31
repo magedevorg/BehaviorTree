@@ -35,15 +35,31 @@ public:
 	MBTBlackboardDecorator(class MBTNode* inNode);
 
 public:
-	// 조건을 체크
-	MBOOL CheckCondition(class MBTBlackboard* inBlackboard);
-	
+	void SetKey(const MString& inKey) {
+		Key = inKey;
+	}
+
 	// 키를 얻는다
-	const MString& GetKey() {
+	const MString& GetKey() const {
 		return Key;
 	}
 
+	void SetAbortMode(MBTFlowAbortMode inAbortMode) {
+		AbortMode = inAbortMode;
+	}
+	
+	MBTFlowAbortMode GetAbortMode() const {
+		return AbortMode;
+	}
 
+	void SetBoolValue(MBOOL inValue)
+	{
+		BoolValue = inValue;
+	}
+
+	// 조건을 체크
+	MBOOL CheckCondition(class MBTBlackboard* inBlackboard);
+	
 protected:
 	// 산술 연산 체크 로직
 	template <typename T>
@@ -75,6 +91,9 @@ protected:
 protected:
 	// 블랙 보드 키 값
 	MString Key;
+
+
+	MBTFlowAbortMode AbortMode;
 
 	//--------------------------------------------------
 	// 타입에 따른 설정값

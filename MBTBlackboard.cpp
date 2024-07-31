@@ -8,6 +8,7 @@ MBTBlackboard::~MBTBlackboard()
 {
 	MCLEAR_PTR_MAP(Int32ValueMap);
 	MCLEAR_PTR_MAP(BoolValueMap);
+	MCLEAR_PTR_MAP(Vector3ValueMap);
 }
 
 

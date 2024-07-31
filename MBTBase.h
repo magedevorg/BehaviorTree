@@ -59,6 +59,7 @@ enum class MBTBlackboardValueType : MUINT16
 	None = 0,
 	Int32,
 	Bool,
+	Vector3,
 };
 
 
@@ -79,4 +80,15 @@ enum class MBTArithmeticOperation : uint8
 	LessOrEqual,
 	Greater,	
 	GreaterOrEqual,
+};
+
+
+
+
+enum class MBTFlowAbortMode : uint8
+{
+	None				UMETA(DisplayName = "Nothing"),
+	LowerPriority		UMETA(DisplayName = "Lower Priority"),
+	Self				UMETA(DisplayName = "Self"),
+	Both				UMETA(DisplayName = "Both"),
 };

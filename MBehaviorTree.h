@@ -59,7 +59,7 @@ protected:
 
 
 	// 
-	void CheckForceStartNode_BlackboardDecorator(MBTExecuteParam& inParam);
+	void CheckForceStartNode_BlackboardDecorator(struct MBTExecuteParam& inParam);
 	
 protected:
 	// 루트 노드

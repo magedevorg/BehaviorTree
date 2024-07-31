@@ -4,6 +4,7 @@
 
 #include "MBTBase.h"
 #include "MString.h"
+#include "MVector.h"
 
 
 //----------------------------------------------------------------
@@ -71,7 +72,7 @@ public:
 	// bool
 	//-------------------------------------------------------------
 	void AddBoolValue(const MString& inKey, MBOOL inValue) {
-		AddValueLogic<bool>(BoolValueMap, inKey, inValue, MBTBlackboardValueType::Bool);
+		AddValueLogic<MBOOL>(BoolValueMap, inKey, inValue, MBTBlackboardValueType::Bool);
 	}
 
 	void SetBoolValue(const MString& inKey, MBOOL inValue) {
@@ -80,6 +81,21 @@ public:
 
 	MBOOL GetBoolValue(const MString& inKey) {
 		return GetValueLogic<MBOOL>(BoolValueMap, inKey);
+	}
+
+	//-------------------------------------------------------------
+	// vector3
+	//-------------------------------------------------------------
+	void AddVector3Value(const MString& inKey, const MVector3& inValue) {
+		AddValueLogic<MVector3>(Vector3ValueMap, inKey, inValue, MBTBlackboardValueType::Vector3);
+	}
+
+	void SetVector3Value(const MString& inKey, const MVector3 inValue) {
+		SetValueLogic<MVector3>(Vector3ValueMap, inKey, inValue);
+	}
+
+	const MVector3& GetVector3Value(const MString& inKey) {
+		return GetValueLogic<MVector3>(Vector3ValueMap, inKey);
 	}
 
 
@@ -91,7 +107,7 @@ public:
 	}
 
 	void ClearChangeValueList() {
-		ChangeValueList.empty();
+		ChangeValueList.clear();
 	}
 	
 protected:
@@ -152,6 +168,9 @@ protected:
 
 	// 부울 값
 	std::map<MString, MBTBlackboardValue<MBOOL>*> BoolValueMap;
+
+	// 부울 값
+	std::map<MString, MBTBlackboardValue<MVector3>*> Vector3ValueMap;
 
 	//--------------------------------------------------------------
 	// 기타
