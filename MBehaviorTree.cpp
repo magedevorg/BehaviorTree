@@ -95,6 +95,13 @@ void MBehaviorTree::UpdateBehaviorTree(float inDelta)
 
 void MBehaviorTree::AddBlackboardDecorator(class MBTBlackboardDecorator* inDecorator)
 {
+	MBTFlowAbortMode abortMode = inDecorator->GetAbortMode();
+
+	// 중단 모드가 설정되어있지 않다면 추가하지 않는다
+	if (MBTFlowAbortMode::None == abortMode) {
+		return;
+	}
+
 	std::list<class MBTBlackboardDecorator*>* decoratorList = nullptr;
 	{
 		auto findIter = BlackboardDecoratorListMap.find(inDecorator->GetKey());
@@ -117,6 +124,9 @@ void MBehaviorTree::AddBlackboardDecorator(class MBTBlackboardDecorator* inDecor
 void MBehaviorTree::CheckForceStartNode_BlackboardDecorator(MBTExecuteParam& inParam)
 {
 	// 변경된 블랙 보드 정보가 있는지 체크
+	// 여기 등록된 블랙보드 데코레이터는 중단설정이 되어있는것들임
+
+
 	std::vector<MBTBlackboardValueBase*>* changeValueList = Blackboard->GetChangeValueList();
 	if (MFALSE == changeValueList->empty())
 	{

@@ -35,10 +35,6 @@ public:
 	MBTBlackboardDecorator(class MBTNode* inNode);
 
 public:
-	void SetKey(const MString& inKey) {
-		Key = inKey;
-	}
-
 	// 키를 얻는다
 	const MString& GetKey() const {
 		return Key;
@@ -52,13 +48,19 @@ public:
 		return AbortMode;
 	}
 
-	void SetBoolValue(MBOOL inValue)
-	{
-		BoolValue = inValue;
-	}
-
 	// 조건을 체크
 	MBOOL CheckCondition(class MBTBlackboard* inBlackboard);
+
+	//---------------------------------------------------------------
+	// 체크 설정
+	//---------------------------------------------------------------
+	// 부울 체크
+	void CheckBool(const MString& inKey, MBOOL inValue);
+	
+
+
+
+	
 	
 protected:
 	// 산술 연산 체크 로직
@@ -98,10 +100,11 @@ protected:
 	//--------------------------------------------------
 	// 타입에 따른 설정값
 	//--------------------------------------------------
+	MBTBlackboardValueType CheckValueType;
+	
 	// bool 형
 	MBOOL BoolValue;
-	MBTKeyOperation KeyOperation;
-
+	
 	// int 형
 	MINT32 Int32Value;
 	MBTArithmeticOperation ArithmeticOperation;

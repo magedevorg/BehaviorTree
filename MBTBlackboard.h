@@ -106,7 +106,12 @@ public:
 		return &ChangeValueList;
 	}
 
-	void ClearChangeValueList() {
+	void ClearChangeValueList() 
+	{
+		for (MBTBlackboardValueBase* valueBase : ChangeValueList) {
+			valueBase->IsChange = MFALSE;
+		}
+
 		ChangeValueList.clear();
 	}
 	

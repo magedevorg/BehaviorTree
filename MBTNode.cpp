@@ -39,7 +39,7 @@ MBOOL MBTNode::CheckExecuteCondition(const MBTExecuteParam& inParam)
 	// 블랙보드를 얻는다
 	MBTBlackboard* blackboard = inParam.BehaviorTree->GetBlackboard();
 
-	// 등록된 데코레이터를 돌면서 값이 맞는지 체크
+	// 등록된 데코레이터를 돌면서 값이 맞는지 체크(우선 AND 조건으로 체크)
 	for (MBTBlackboardDecorator* decoration : BlackboardDecoratorList)
 	{
 		if (MFALSE == decoration->CheckCondition(blackboard)) {
@@ -179,6 +179,10 @@ MBTExecuteResult MBTTaskNode::Execute(const MBTExecuteParam& inParam)
 		return inParam.ExecuteNodeResult;
 	}
 
+	// 설정된 조건에 맞는지
+	if (MFALSE == CheckExecuteCondition(inParam)) {
+		return MBTExecuteResult::Failed;
+	}
 
 	// 테스크 노드 실행
 	MBTResult result = ExecuteTaskNode(inParam.BehaviorTree);

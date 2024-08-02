@@ -24,6 +24,14 @@ MBTBlackboardDecorator::MBTBlackboardDecorator(class MBTNode* inNode)
 {	
 }
 
+void MBTBlackboardDecorator::CheckBool(const MString& inKey, MBOOL inValue)
+{
+	Key = inKey;
+	BoolValue = inValue;
+}
+
+
+
 MBOOL MBTBlackboardDecorator::CheckCondition(class MBTBlackboard* inBlackboard)
 {
 	// 타입별 처리
@@ -35,14 +43,10 @@ MBOOL MBTBlackboardDecorator::CheckCondition(class MBTBlackboard* inBlackboard)
 		// 값을 얻는다
 		MBOOL value = inBlackboard->GetBoolValue(Key);
 
-		MBOOL check = MFALSE;
-		if (MBTKeyOperation::Set == KeyOperation) {
-			check = MTRUE;
+		if (value == BoolValue) {
+			return MTRUE;
 		}
 
-		if (check == value) {
-			return TRUE;
-		}
 	} break;
 	case MBTBlackboardValueType::Int32:
 	{
