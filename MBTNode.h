@@ -94,8 +94,8 @@ public:
 
 public:
 	// 초기화
-	virtual void InitNum(int32& inBase) override;
-	virtual void InitDepth(int32& inBase) override;
+	virtual void InitNum(MINT32& inBase) override;
+	virtual void InitDepth(MINT32& inBase) override;
 
 	// 데코레이더 초기화
 	virtual void InitDecorator(class MBehaviorTree* inBehaviorTree) override;

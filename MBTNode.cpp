@@ -72,7 +72,7 @@ MBTCompositeNode::~MBTCompositeNode()
 }
 
 
-void MBTCompositeNode::InitNum(int32& inBase)
+void MBTCompositeNode::InitNum(MINT32& inBase)
 {
 	// 자신을 설정하고
 	MBTNode::InitNum(inBase);
@@ -83,7 +83,7 @@ void MBTCompositeNode::InitNum(int32& inBase)
 	}
 }
 
-void MBTCompositeNode::InitDepth(int32& inBase)
+void MBTCompositeNode::InitDepth(MINT32& inBase)
 {	
 	Depth = inBase++;
 

@@ -48,7 +48,7 @@ enum class MBTKeyOperation : MUINT16
 
 
 // 산술 연산
-enum class MBTArithmeticOperation : uint8
+enum class MBTArithmeticOperation : MUINT16
 {
 	Equal,		
 	NotEqual,
@@ -61,12 +61,12 @@ enum class MBTArithmeticOperation : uint8
 
 
 
-enum class MBTFlowAbortMode : uint8
+enum class MBTFlowAbortMode : MUINT16
 {
-	None				UMETA(DisplayName = "Nothing"),
-	LowerPriority		UMETA(DisplayName = "Lower Priority"),
-	Self				UMETA(DisplayName = "Self"),
-	Both				UMETA(DisplayName = "Both"),
+	None = 0,			// DisplayName = "Nothing",
+	LowerPriority,		// DisplayName = "Lower Priority",
+	Self,				// DisplayName = "Self",
+	Both,				// DisplayName = "Both",
 };
 
 
