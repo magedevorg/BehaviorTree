@@ -6,23 +6,6 @@
 
 
 
-// execute시에 필요한 파라미터
-struct MBTExecuteParam
-{
-	// 비헤비더 트리
-	class MBehaviorTree* BehaviorTree = nullptr;
-
-	//-------------------------------------------------------
-	// 실행 정보
-	//-------------------------------------------------------
-	// 실행노드 
-	MINT32 ExecuteNodeNum = 0;
-	MBTExecuteResult ExecuteNodeResult = MBTExecuteResult::None;
-};
-
-
-
-
 
 //------------------------------------------------------------
 // Behavior Tree 최상위 노드
@@ -50,22 +33,15 @@ public:
 
 	// 데코레이더 초기화
 	virtual void InitDecorator(class MBehaviorTree* inBehaviorTree);
-
-
-	//-----------------------------------------------------------
-	// 기능함수
-	//-----------------------------------------------------------
-	// 실행
-	virtual MBTExecuteResult Execute(const MBTExecuteParam& inParam) {
-		return MBTExecuteResult::Succeeded;
-	}
-
+	
+	// 노드 실행
+	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) = 0;
+	
 	// 노드 갱신
 	virtual MBTResult Update(class MBehaviorTree* inBehaviorTree, float inDelta) {
 		return MBTResult::Succeeded;
 	}
 	
-
 	//-----------------------------------------------------------
 	// 데코레이터 추가
 	//-----------------------------------------------------------
@@ -85,11 +61,9 @@ public:
 	}
 
 protected:
+
 	// 해당 노드가 실행될수 있는지 체크
 	MBOOL CheckExecuteCondition(const MBTExecuteParam& inParam);
-
-	
-	
 
 protected:
 	// 노드 번호
@@ -126,6 +100,8 @@ public:
 	// 데코레이더 초기화
 	virtual void InitDecorator(class MBehaviorTree* inBehaviorTree) override;
 
+	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
+
 	template<typename T>
 	T* AddChildNode()
 	{
@@ -134,6 +110,11 @@ public:
 		ChildNodeList.push_back(childNode);
 		return childNode;
 	}
+
+protected:
+	// 결과 플래그가 정지타입인지 체크
+	virtual MBOOL CheckStopFlag(MBTResult inResult) = 0;
+
 
 protected:
 	// 자식 노드 리스트
@@ -150,8 +131,8 @@ class MBTSequenceNode : public MBTCompositeNode
 public:
 	MBTSequenceNode() {}
 
-public:
-	virtual MBTExecuteResult Execute(const MBTExecuteParam& inParam) override;
+protected:
+	virtual MBOOL CheckStopFlag(MBTResult inResult) override;
 };
 
 
@@ -165,8 +146,8 @@ class MBTSelectorNode : public MBTCompositeNode
 public:
 	MBTSelectorNode() {}
 
-public:
-	virtual MBTExecuteResult Execute(const MBTExecuteParam& inParam) override;
+protected:
+	virtual MBOOL CheckStopFlag(MBTResult inResult) override;
 };
 
 
@@ -181,21 +162,9 @@ public:
 	MBTTaskNode() {}
 
 public:
-	// 노드 실행
-	virtual MBTExecuteResult Execute(const MBTExecuteParam& inParam) override;
-
-	// 노드 갱신
-	virtual MBTResult Update(class MBehaviorTree* inBehaviorTree, float inDelta) override;
+	virtual MBOOL Execute(MBTResult& inResult, const MBTExecuteParam& inParam) override;
 
 protected:
-	// 작업 시작
-	virtual MBTResult ExecuteTaskNode(class MBehaviorTree* inBehaviorTree) {
-		return MBTResult::Succeeded;
-	}
-
-	// 노드 갱신 처리
-	virtual MBTResult UpdateTaskNode(class MBehaviorTree* inBehaviorTree, float inDelta) {
-		return MBTResult::Succeeded;
-	}
+	virtual MBTResult ExecuteTaskNode(class MBehaviorTree* inBehaviorTree) = 0;
 };
 

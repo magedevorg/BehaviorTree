@@ -20,11 +20,16 @@ MBTNode::~MBTNode()
 
 void MBTNode::InitDecorator(class MBehaviorTree* inBehaviorTree)
 {
+	/*
 	// 블랙보드 데코레이터를 behavirotree에 추가
 	for (auto& decorator : BlackboardDecoratorList) {
 		inBehaviorTree->AddBlackboardDecorator(decorator);
 	}
+	*/
 }
+
+
+
 
 MBTBlackboardDecorator* MBTNode::AddBlackboardDecorator()
 {
@@ -36,17 +41,22 @@ MBTBlackboardDecorator* MBTNode::AddBlackboardDecorator()
 
 MBOOL MBTNode::CheckExecuteCondition(const MBTExecuteParam& inParam)
 {
-	// 블랙보드를 얻는다
-	MBTBlackboard* blackboard = inParam.BehaviorTree->GetBlackboard();
-
-	// 등록된 데코레이터를 돌면서 값이 맞는지 체크(우선 AND 조건으로 체크)
-	for (MBTBlackboardDecorator* decoration : BlackboardDecoratorList)
+	// 실행 조건을 체크한다
+	
+	// 블랙 보드 체크
 	{
-		if (MFALSE == decoration->CheckCondition(blackboard)) {
-			return MFALSE;
+		// 블랙보드를 얻는다
+		MBTBlackboard* blackboard = inParam.BehaviorTree->GetBlackboard();
+
+		// 등록된 데코레이터를 돌면서 값이 맞는지 체크(우선 AND 조건으로 체크)
+		for (MBTBlackboardDecorator* decoration : BlackboardDecoratorList)
+		{
+			if (MFALSE == decoration->CheckCondition(blackboard)) {
+				return MFALSE;
+			}
 		}
 	}
-
+	
 	return MTRUE;
 }
 
@@ -95,109 +105,108 @@ void MBTCompositeNode::InitDecorator(class MBehaviorTree* inBehaviorTree)
 	}
 }
 
+MBOOL MBTCompositeNode::Execute(MBTResult& inResult, const MBTExecuteParam& inParam)
+{
+	// 해당 노드가 실행될수 있는지 체크
+	if (MFALSE == CheckExecuteCondition(inParam)) 
+	{
+		inResult = MBTResult::Failed;
+		return MTRUE;
+	}
+
+	MBOOL isProcess = MFALSE;
+	
+	// 스택에 설정
+	inParam.BehaviorTree->PushNodeStack(this);
+
+	for (auto& childNode : ChildNodeList)
+	{
+		if (MFALSE == childNode->Execute(inResult, inParam)) {
+			continue;
+		}
+
+		isProcess = MTRUE;
+
+		// 중단 결과인지 체크
+		if (MTRUE == CheckStopFlag(inResult)) {
+			break;
+		}
+	}
+
+	if (MFALSE == isProcess || (MBTResult::InProgress != inResult))
+	{
+		// 처리가 되지 않았거나 
+		// 결과 플래그가 처리중이라면 스택에서 제거
+		inParam.BehaviorTree->PopNodeStack(this);
+	}
+
+	return isProcess;
+}
+
 
 //-----------------------------------------------------------------
 // MBTSequenceNode
 // 모든 노드가 success일경우 success
 //-----------------------------------------------------------------
-MBTExecuteResult MBTSequenceNode::Execute(const MBTExecuteParam& inParam)
+MBOOL MBTSequenceNode::CheckStopFlag(MBTResult inResult)
 {
-	MBTExecuteResult result = MBTExecuteResult::Skip;
-
-	// 자식 노드 실행
-	for (auto& childNode : ChildNodeList)
+	switch (inResult)
 	{
-		// 실행 및 결과 설정
-		result = childNode->Execute(inParam);
-
-		// none인경우 다음처리
-		if (MBTExecuteResult::Skip == result) {
-			continue;
-		}
-
-		// 실패/진행중/중단인 경우 리턴
-		switch (result)
-		{
-		case MBTExecuteResult::Failed:
-		case MBTExecuteResult::InProgress:
-		case MBTExecuteResult::Abort:
-			return result;
-		}
+	case MBTResult::Failed:
+	case MBTResult::InProgress:
+	case MBTResult::Abort:
+		return MTRUE;
 	}
-	
-	return result;
+
+	return MFALSE;
 }
-
-
 
 //-----------------------------------------------------------------
 // MBTSelectorNode
 // 모든 노드가 fail인경우 fail
 //-----------------------------------------------------------------
-MBTExecuteResult MBTSelectorNode::Execute(const MBTExecuteParam& inParam)
+MBOOL MBTSelectorNode::CheckStopFlag(MBTResult inResult)
 {
-	MBTExecuteResult result = MBTExecuteResult::Skip;
-
-	// 자식 노드 루프
-	for (MBTNode* childNode : ChildNodeList)
+	switch (inResult)
 	{
-		// 실행 및 결과 설정
-		result = childNode->Execute(inParam);
-
-		// none인경우 다음처리
-		if (MBTExecuteResult::Skip == result) {
-			continue;
-		}
-
-		// 성공/처리중/중단인 경우 바로 리턴
-		switch (result)
-		{
-		case MBTExecuteResult::Succeeded:
-		case MBTExecuteResult::InProgress:
-		case MBTExecuteResult::Abort:
-			return result;
-		}
+	case MBTResult::Succeeded:
+	case MBTResult::InProgress:
+	case MBTResult::Abort:
+		return MTRUE;
 	}
-
-	return result;
+	return MFALSE;
 }
-
 
 
 //-----------------------------------------------------------------
 // MBTTaskNode
 //-----------------------------------------------------------------
-MBTExecuteResult MBTTaskNode::Execute(const MBTExecuteParam& inParam)
+MBOOL MBTTaskNode::Execute(MBTResult& inResult, const MBTExecuteParam& inParam)
 {
 	// 강제로 시작 노드 번호보다 작다면 스킵
 	if (Num < inParam.ExecuteNodeNum) {
-		return MBTExecuteResult::Skip;
+		return MFALSE;
 	}
 
 	// 강제 시작 노드라면 설정된 리턴값 처리
-	if (Num == inParam.ExecuteNodeNum && (MBTExecuteResult::None != inParam.ExecuteNodeResult)) {
-		return inParam.ExecuteNodeResult;
+	if (Num == inParam.ExecuteNodeNum && (MTRUE == inParam.ExecuteNodeUseResult))
+	{
+		inResult = inParam.ExecuteNodeResult;
+		return MTRUE;
 	}
 
-	// 설정된 조건에 맞는지
-	if (MFALSE == CheckExecuteCondition(inParam)) {
-		return MBTExecuteResult::Failed;
-	}
+	// 스택에 설정
+	inParam.BehaviorTree->PushNodeStack(this);
 
-	// 테스크 노드 실행
+	// 결과를 얻는다
 	MBTResult result = ExecuteTaskNode(inParam.BehaviorTree);
-	
-	// 만약 진행중이라면 행동 트리에 진행중인 작업을 설정하고 리턴
-	if (MBTResult::InProgress == result) {
-		inParam.BehaviorTree->SetInProgressTaskNode(this);
+	if (MBTResult::InProgress != inResult)
+	{
+		// 처리가 되지 않았거나 
+		// 결과 플래그가 처리중이라면 스택에서 제거
+		inParam.BehaviorTree->PopNodeStack(this);
 	}
 
-	return (MBTExecuteResult)result;
+	return MTRUE;
 }
 
-
-
-MBTResult MBTTaskNode::Update(class MBehaviorTree* inBehaviorTree, float inDelta)
-{
-	return UpdateTaskNode(inBehaviorTree, inDelta);
-}

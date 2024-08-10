@@ -22,10 +22,12 @@ MBehaviorTree::~MBehaviorTree()
 		delete RootNode;
 	}
 	
+	/*
 	// 리스트 제거
 	for (auto& iter : BlackboardDecoratorListMap) {
 		delete iter.second;
 	}
+	*/
 }
 
 
@@ -40,6 +42,9 @@ void MBehaviorTree::FinishedNodeSetting()
 	MINT32 depth = 0;
 	RootNode->InitDepth(depth);
 
+	// 사이즈를 우선 설정해준다(임시로 100)
+	NodeStack.resize(100);
+
 	// 데코레이터 초기화
 	RootNode->InitDecorator(this);
 }
@@ -52,13 +57,13 @@ void MBehaviorTree::UpdateBehaviorTree(float inDelta)
 	{
 		param.BehaviorTree = this;
 		param.ExecuteNodeNum = std::numeric_limits<MINT32>::max();
-		param.ExecuteNodeResult = MBTExecuteResult::None;
+		param.ExecuteNodeUseResult = MFALSE;
+		param.ExecuteNodeResult = MBTResult::Succeeded;
 	}
 
 
 	// 블랙보드 체크
-	CheckForceStartNode_BlackboardDecorator(param);
-
+	//CheckForceStartNode_BlackboardDecorator(param);
 
 	// 현재 진행중인 노드가 있는경우
 	if (nullptr != InProgressTaskNode)
@@ -66,20 +71,23 @@ void MBehaviorTree::UpdateBehaviorTree(float inDelta)
 		// 진행중인 노드 번호
 		const MINT32 inProgressTaskNodeNum = InProgressTaskNode->GetNum();
 
-		// 강제 진행해야하는 노드보다 진행중인 노드의 우선순위가 더 높다면 그댜로 진행
+		// 강제 진행해야하는 노드보다 진행중인 노드의 우선순위가 더 높다면 그대로 진행
 		if (inProgressTaskNodeNum < param.ExecuteNodeNum)
 		{
-			// 해당 노드가 진행중인경우 리턴
+			// 처리되던 노드를 갱신
 			MBTResult inProgressTaskResult = InProgressTaskNode->Update(this, inDelta);
+
+			// 아직 진행중이라면 추가적으로 처리하지 않는다
 			if (MBTResult::InProgress == inProgressTaskResult) {
 				return;
 			}
 
 			// 그외의 경우는 해당 노드로 이동해서 그대로 결과 처리
 			param.ExecuteNodeNum = inProgressTaskNodeNum;
-			param.ExecuteNodeResult = (MBTExecuteResult)inProgressTaskResult;
+			param.ExecuteNodeUseResult = MTRUE;
+			param.ExecuteNodeResult = inProgressTaskResult;
 			
-			// 초기화
+			// 진행중이던 노드 해제
 			InProgressTaskNode = nullptr;
 		}
 	}
@@ -90,9 +98,23 @@ void MBehaviorTree::UpdateBehaviorTree(float inDelta)
 	}
 	
 	// 실행
-	RootNode->Execute(param);
+	MBTResult result;
+	RootNode->Execute(result, param);
 }
 
+void MBehaviorTree::PushNodeStack(class MBTNode* inNode)
+{
+	MINT32 nodeDepth = inNode->GetDepth();
+	NodeStack[nodeDepth] = inNode;
+}
+
+void MBehaviorTree::PopNodeStack(class MBTNode* inNode)
+{
+	MINT32 nodeDepth = inNode->GetDepth();
+	NodeStack[nodeDepth] = nullptr;
+}
+
+/*
 void MBehaviorTree::AddBlackboardDecorator(class MBTBlackboardDecorator* inDecorator)
 {
 	MBTFlowAbortMode abortMode = inDecorator->GetAbortMode();
@@ -148,7 +170,7 @@ void MBehaviorTree::CheckForceStartNode_BlackboardDecorator(MBTExecuteParam& inP
 					inParam.ExecuteNodeNum = FMath::Min(inParam.ExecuteNodeNum, nodeNum);
 
 					// 결과는 None으로 설정해서 해당 노드에서 실행되도록
-					inParam.ExecuteNodeResult = MBTExecuteResult::None;
+					inParam.ExecuteNodeUseResult = MFALSE;
 				}
 			}
 		}
@@ -159,3 +181,4 @@ void MBehaviorTree::CheckForceStartNode_BlackboardDecorator(MBTExecuteParam& inP
 }
 
 
+*/

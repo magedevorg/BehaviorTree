@@ -34,9 +34,15 @@ public:
 	// 노드 설정이 끝나면 호출
 	void FinishedNodeSetting();
 
-
 	// 비헤비어 트리 갱신
 	void UpdateBehaviorTree(float inDelta);
+
+
+	//----------------------------------------------------------------
+	// 노드 스택
+	//----------------------------------------------------------------
+	void PushNodeStack(class MBTNode* inNode);
+	void PopNodeStack(class MBTNode* inNode);
 	
 	// 진한중인 테스크 노드를 설정
 	void SetInProgressTaskNode(class MBTTaskNode* inTaskNode) {
@@ -52,14 +58,14 @@ public:
 	class MBTBlackboard* GetBlackboard() {
 		return Blackboard;
 	}
+	
+	
 
 protected:
 	// 블랙보드 데코레이터 추가
-	void AddBlackboardDecorator(class MBTBlackboardDecorator* inDecorator);
+	// void AddBlackboardDecorator(class MBTBlackboardDecorator* inDecorator);
 
-
-	// 
-	void CheckForceStartNode_BlackboardDecorator(struct MBTExecuteParam& inParam);
+	// void CheckForceStartNode_BlackboardDecorator(struct MBTExecuteParam& inParam);
 	
 protected:
 	// 루트 노드
@@ -71,10 +77,15 @@ protected:
 	// 진행중인 Task Node
 	class MBTTaskNode* InProgressTaskNode = nullptr;
 
+	//---------------------------------------------------------------
+	// 노드 스택
+	// 인덱스는 뎁스
+	//---------------------------------------------------------------
+	std::vector<class MBTNode*> NodeStack;
 
 	//---------------------------------------------------------------
 	// 데코레이터
 	//---------------------------------------------------------------
 	// 블랙보드 데코레이터 맵
-	std::map<MString, std::list<class MBTBlackboardDecorator*>*> BlackboardDecoratorListMap;
+	//std::map<MString, std::list<class MBTBlackboardDecorator*>*> BlackboardDecoratorListMap;
 };
